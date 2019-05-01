@@ -18,15 +18,15 @@ describe('getAvailabilities', () => {
     beforeEach(async () => {
       await knex('events').insert([
         {
+          kind: 'opening',
+          starts_at: new Date('2014-08-11 09:30'),
+          ends_at: new Date('2014-08-11 12:30'),
+          weekly_recurring: true,
+        },
+        {
           kind: 'appointment',
           starts_at: new Date('2014-08-11 10:30'),
           ends_at: new Date('2014-08-11 11:30'),
-        },
-        {
-          kind: 'opening',
-          starts_at: new Date('2014-08-04 09:30'),
-          ends_at: new Date('2014-08-04 12:30'),
-          weekly_recurring: true,
         },
       ]);
     });
@@ -47,7 +47,7 @@ describe('getAvailabilities', () => {
         '9:30',
         '10:00',
         '11:30',
-        '14:00',
+        '12:00',
       ]);
 
       expect(String(availabilities[6].date)).toBe(

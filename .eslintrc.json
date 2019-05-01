@@ -1,8 +1,4 @@
 {
     "extends": "airbnb-base",
-    "settings": {
-        "import/resolver": {
-            "babel-module": {}
-        }
-    }
+    "plugins": ["jest"]
 }
