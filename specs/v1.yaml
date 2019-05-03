@@ -1,0 +1,471 @@
+swagger: "2.0"
+info:
+  title: Absence Repoter
+  description: Report absence for individuals or teams
+  version: 1.0.0
+host: absences.api.doctorlib.com
+basePath: /v1
+schemes:
+  - https
+  - http
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /employees:
+    get:
+      tags:
+        - Employee
+      summary: Get all employess with absence days
+      description: Return an array with all employees with absence days in the database.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              employees:
+                type: array
+                items:
+                  $ref: "#/definitions/Employee"
+
+  /employee/{employee_id}:
+    get:
+      tags:
+        - Employee
+      summary: Get employee details
+      parameters:
+        - $ref: "#/parameters/employeeId"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/Employee"
+        "400":
+          description: Invalid employee id supplied
+        "404":
+          description: Employee not found
+    delete:
+      tags:
+        - Employee
+      summary: Delete an employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+      responses:
+        "200":
+          description: OK
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /employee:
+    post:
+      tags:
+        - Employee
+      summary: Create a new employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+        - in: body
+          name: employee
+          description: employee details
+          required: true
+          schema:
+            $ref: "#/definitions/Employee"
+      responses:
+        "201":
+          description: employee created
+          schema:
+            $ref: "#/definitions/Employee"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      tags:
+        - Employee
+      summary: Rewrite employee details
+      parameters:
+        - $ref: "#/parameters/employeeId"
+        - in: body
+          name: employee
+          description: new data for employee
+          required: true
+          schema:
+            $ref: "#/definitions/Employee"
+      responses:
+        "204":
+          description: employee updated
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Get all groups in the Database
+      description: Return an array with all groups in the database
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              groups:
+                type: array
+                items:
+                  $ref: "#/definitions/Group"
+
+  /group/{group_id}:
+    get:
+      tags:
+        - Groups
+      summary: Get group details with employees in the group
+      parameters:
+        - $ref: "#/parameters/groupId"
+      responses:
+        "200":
+          description: OK
+          schema:
+            required:
+              - group
+            type: object
+            properties:
+              group:
+                $ref: "#/definitions/Group"
+              employees:
+                $ref: "#/definitions/Employees"
+        "400":
+          description: Invalid group id supplied
+        "404":
+          description: Group not found
+    delete:
+      tags:
+        - Employee
+      summary: Delete an employee
+      parameters:
+        - $ref: "#/parameters/groupId"
+      responses:
+        "200":
+          description: OK
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /group:
+    post:
+      tags:
+        - Groups
+      summary: Create a new group
+      parameters:
+        - in: body
+          name: group
+          description: Group name to create
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+          required: true
+
+      responses:
+        "201":
+          description: employee created
+          schema:
+            $ref: "#/definitions/Employee"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      tags:
+        - Groups
+      summary: Rewrite group name
+      parameters:
+        - in: body
+          name: group
+          description: new data for group
+          required: true
+          schema:
+            $ref: "#/definitions/Group"
+      responses:
+        "204":
+          description: Group updated
+        "400":
+          description: Invalid group id supplied
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /absences:
+    get:
+      tags:
+        - Absence - Employee
+      description: Return all absences for in the database
+      summary: Return all absences for in the database
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                employee:
+                  $ref: "#/definitions/EmployeeShort"
+                absences:
+                  $ref: "#/definitions/Absences"
+
+  /absence/employee/{employee_id}:
+    get:
+      description: Get absences for a specific employee
+      summary: Get absences for a specific employee
+      tags:
+        - Absence - Employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/EmployeeAbsences"
+        400:
+          description: Invalid employee id supplied
+        404:
+          description: Employee id not found
+    put:
+      summary: Rewrite employee absence
+      description: Rewrite employee absence
+      tags:
+        - Absence - Employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+        - in: body
+          name: abcense
+          schema:
+            $ref: "#/definitions/Absence"
+      responses:
+        200:
+          description: OK
+    post:
+      summary: Add new abcense for a specific employee
+      description: Add new abcense for a specific employee
+      tags:
+        - Absence - Employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+        - in: body
+          name: abcense
+          schema:
+            $ref: "#/definitions/Absence"
+      responses:
+        200:
+          description: OK
+
+  /absence/employee/{employee_id}/fromDate/{from_date}:
+    delete:
+      description: Delete an absence for specific employee
+      tags:
+        - Absence - Employee
+      parameters:
+        - $ref: "#/parameters/employeeId"
+        - $ref: "#/parameters/fromDate"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Ivalid employee id
+        404:
+          description: Employee id not found
+
+  /absence/group/byId/{group_id}:
+    get:
+      description: get all abcesnses for a specific group by id
+      summary: get all abcesnses for a specific group by id
+      tags:
+        - Absence - Group
+      parameters:
+        - $ref: "#/parameters/groupId"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/GroupAbsence"
+        400:
+          description: Ivalid group id
+        404:
+          description: Group id not found
+    post:
+      description: post absence for group by id
+      summary: post absence for group by id
+      tags:
+        - Absence - Group
+      parameters:
+        - $ref: "#/parameters/groupId"
+        - $ref: "#/parameters/abcense"
+
+      responses:
+        200:
+          description: OK
+        400:
+          description: Ivalid group id
+        404:
+          description: Group id not found
+    put:
+      description: Rewrite absence for group by id
+      summary: Rewrite absence for group by id
+      tags:
+        - Absence - Group
+      parameters:
+        - $ref: "#/parameters/groupId"
+        - in: body
+          name: absence
+          schema:
+            $ref: "#/definitions/Absence"
+
+      responses:
+        200:
+          description: OK
+        400:
+          description: Ivalid group id
+        404:
+          description: Group id not found
+    delete:
+      description: Delete an abcense for a specific group by id
+      summary: Delete an abcense for a specific group by id
+      tags:
+        - Absence - Group
+      parameters:
+        - $ref: "#/parameters/groupId"
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/GroupAbsence"
+        400:
+          description: Ivalid group id
+        404:
+          description: Group id not found
+
+parameters:
+  employeeId:
+    in: path
+    name: employee_id
+    description: employee id
+    type: integer
+    required: true
+  groupId:
+    in: path
+    name: group_id
+    description: group id
+    type: integer
+    required: true
+  fromDate:
+    in: path
+    name: from_date
+    description: from date value of the absence
+    type: string
+    format: date-time
+    required: true
+  abcense:
+    in: body
+    name: absence
+    description: the abcense data
+    schema:
+      $ref: "#/definitions/Absence"
+
+definitions:
+  Employee:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      created_at:
+        type: string
+        format: date-time
+      group_id:
+        type: integer
+  Employees:
+    type: array
+    items:
+      $ref: "#/definitions/Employee"
+
+  EmployeeShort:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Employee ID
+      name:
+        type: string
+        description: Employee Name
+
+  EmployeeAbsences:
+    type: object
+    properties:
+      employee:
+        $ref: "#/definitions/EmployeeShort"
+      absences:
+        $ref: "#/definitions/Absences"
+
+  EmployeesAbsences:
+    type: array
+    items:
+      $ref: "#/definitions/EmployeeAbsences"
+
+  Group:
+    type: object
+    required:
+      - group_id
+    properties:
+      group_id:
+        type: integer
+      group_name:
+        type: string
+
+  GroupAbsence:
+    type: object
+    properties:
+      group:
+        $ref: "#/definitions/Group"
+      abcenses:
+        $ref: "#/definitions/EmployeesAbsences"
+
+  Absence:
+    type: object
+    properties:
+      from_date:
+        type: string
+        format: date-time
+      to_date:
+        type: string
+        format: date-time
+      type:
+        type: string
+        enum:
+          - "PTO"
+          - "Sick Leave"
+          - "Home office"
+  Absences:
+    type: array
+    items:
+      $ref: "#/definitions/Absence"
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      statusCode:
+        type: integer
+        format: int
